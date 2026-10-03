@@ -55,10 +55,6 @@
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
-extern DMA_HandleTypeDef hdma_tim1_ch1;
-extern DMA_HandleTypeDef hdma_tim1_ch2;
-extern DMA_HandleTypeDef hdma_tim1_ch3;
-extern DMA_HandleTypeDef hdma_tim1_ch4;
 extern TIM_HandleTypeDef htim14;
 extern UART_HandleTypeDef huart2;
 /* USER CODE BEGIN EV */
@@ -144,49 +140,6 @@ void SysTick_Handler(void)
 /* For the available peripheral interrupt handler names,                      */
 /* please refer to the startup file (startup_stm32c0xx.s).                    */
 /******************************************************************************/
-
-/**
-  * @brief This function handles DMA1 channel 1 interrupt.
-  */
-void DMA1_Channel1_IRQHandler(void)
-{
-  /* USER CODE BEGIN DMA1_Channel1_IRQn 0 */
-
-  /* USER CODE END DMA1_Channel1_IRQn 0 */
-  HAL_DMA_IRQHandler(&hdma_tim1_ch1);
-  /* USER CODE BEGIN DMA1_Channel1_IRQn 1 */
-
-  /* USER CODE END DMA1_Channel1_IRQn 1 */
-}
-
-/**
-  * @brief This function handles DMA1 channel 2 and channel 3 interrupts.
-  */
-void DMA1_Channel2_3_IRQHandler(void)
-{
-  /* USER CODE BEGIN DMA1_Channel2_3_IRQn 0 */
-
-  /* USER CODE END DMA1_Channel2_3_IRQn 0 */
-  HAL_DMA_IRQHandler(&hdma_tim1_ch2);
-  HAL_DMA_IRQHandler(&hdma_tim1_ch3);
-  /* USER CODE BEGIN DMA1_Channel2_3_IRQn 1 */
-
-  /* USER CODE END DMA1_Channel2_3_IRQn 1 */
-}
-
-/**
-  * @brief This function handles DMAMUX and DMA1 channel 4 to channel 7 interrupts.
-  */
-void DMAMUX1_DMA1_CH4_5_IRQHandler(void)
-{
-  /* USER CODE BEGIN DMAMUX1_DMA1_CH4_5_IRQn 0 */
-
-  /* USER CODE END DMAMUX1_DMA1_CH4_5_IRQn 0 */
-  HAL_DMA_IRQHandler(&hdma_tim1_ch4);
-  /* USER CODE BEGIN DMAMUX1_DMA1_CH4_5_IRQn 1 */
-
-  /* USER CODE END DMAMUX1_DMA1_CH4_5_IRQn 1 */
-}
 
 /**
   * @brief This function handles TIM14 global interrupt.
