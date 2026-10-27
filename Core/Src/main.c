@@ -238,6 +238,8 @@ int main(void)
 	    if(io_mode == 0){
 	    	//通常動作時
 	    	hmcp.gpio[MCP23017_PORTB] = (uint8_t)io_out;	//書き込み
+        //
+        hmcp.gpio[MCP23017_PORTB] = (uint8_t)io_in;	//書き込み
 	    }else{
 	    	//セーフティモード時
 	    	uint8_t io_in_fix = io_in & (uint8_t)io_in_fillter;	//入力のフィルタ
