@@ -55,10 +55,14 @@ int16_t version = 1;
 int16_t sub_version = 0;
 
 //シリアルデータ
-uint8_t recv_data;
-uint8_t rx_buf[256];
-uint8_t tx_buf[256];
-int rx_len=0;
+typedef struct {
+  int16_t rx_len;
+  uint8_t recv_data;
+  uint8_t rx_buf[256];
+  uint8_t tx_buf[256];
+} SerialData;
+SerialData serial1;
+SerialData serial2;
 
 //CANデータ
 uint32_t can_id;
@@ -171,7 +175,8 @@ int main(void)
   io_state=0;
   SPM_ModbusSetAddress(dev_id);
 
-  HAL_UART_Receive_IT(&huart2, &recv_data, 1);
+  HAL_UART_Receive_IT(&huart1, &serial1.recv_data, 1);
+  HAL_UART_Receive_IT(&huart2, &serial2.recv_data, 1);
 
   HAL_TIM_Base_Start_IT(&htim14); // Start TIM14 for periodic interrupts
   HAL_GPIO_WritePin(GPIOB, GPIO_PIN_4, GPIO_PIN_RESET); // LED ON
@@ -238,8 +243,8 @@ int main(void)
 	    if(io_mode == 0){
 	    	//通常動作時
 	    	hmcp.gpio[MCP23017_PORTB] = (uint8_t)io_out;	//書き込み
-        //
-        hmcp.gpio[MCP23017_PORTB] = (uint8_t)io_in;	//書き込み
+        //デバック用
+        //hmcp.gpio[MCP23017_PORTB] = (uint8_t)io_in;	//書き込み
 	    }else{
 	    	//セーフティモード時
 	    	uint8_t io_in_fix = io_in & (uint8_t)io_in_fillter;	//入力のフィルタ
@@ -255,14 +260,19 @@ int main(void)
 	    }
 	    mcp23017_write_gpio(&hmcp, MCP23017_PORTB);	//出力の書き込み
 
-		  if(rx_len>0){
-			  //HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 1);
+      //UA
+		  if(serial1.rx_len>0){
 			  HAL_Delay(10);
-			  uint8_t tx_buf[50];
-			  int tx_len = SPM_ModbusTask(rx_buf, rx_len, tx_buf);
-			  HAL_UART_Transmit(&huart2, tx_buf, tx_len, 100);
-			  rx_len=0;
-			  //HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);
+			  int16_t tx_len = SPM_ModbusTask(serial1.rx_buf, serial1.rx_len, serial1.tx_buf);
+			  HAL_UART_Transmit_IT(&huart1, serial1.tx_buf, tx_len);
+			  serial1.rx_len=0;
+		  }
+
+		  if(serial2.rx_len>0){
+			  HAL_Delay(10);
+			  int16_t tx_len = SPM_ModbusTask(serial2.rx_buf, serial2.rx_len, serial2.tx_buf);
+			  HAL_UART_Transmit_IT(&huart2, serial2.tx_buf, tx_len);
+			  serial2.rx_len=0;
 		  }
 
 		/*if(timer_1s==0){
@@ -363,11 +373,16 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-   if (huart->Instance == USART2)
+   if (huart->Instance == USART1)
    {
-	   rx_buf[rx_len] = recv_data;
-	   rx_len++;
-       HAL_UART_Receive_IT(&huart2, &recv_data, 1);
+	   serial1.rx_buf[serial1.rx_len] = serial1.recv_data;
+	   serial1.rx_len++;
+       HAL_UART_Receive_IT(&huart1, &serial1.recv_data, 1);
+   }else if (huart->Instance == USART2)
+   {
+	   serial2.rx_buf[serial2.rx_len] = serial2.recv_data;
+	   serial2.rx_len++;
+       HAL_UART_Receive_IT(&huart2, &serial2.recv_data, 1);
    }
 }
 /* USER CODE END 4 */
